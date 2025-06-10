@@ -1,13 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingCart, User, Menu } from "lucide-react"
+import { ShoppingCart, User, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/contexts/cart-context"
 import { useAuth } from "@/contexts/auth-context"
 import { useState, useEffect } from "react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import * as Dialog from "@radix-ui/react-dialog"
 
 export function Navbar() {
   const { items } = useCart()
@@ -122,19 +122,30 @@ export function Navbar() {
               </Link>
             )}
 
-            {/* Mobile menu */}
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild className="md:hidden">
+            {/* Mobile menu using Dialog instead of Sheet */}
+            <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+              <Dialog.Trigger asChild className="md:hidden">
                 <Button variant="ghost" size="icon">
                   <Menu className="h-5 w-5" />
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="right">
-                <div className="flex flex-col space-y-4 mt-8">
-                  <NavLinks />
-                </div>
-              </SheetContent>
-            </Sheet>
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+                <Dialog.Content className="fixed inset-y-0 right-0 h-full w-3/4 max-w-sm bg-background p-6 shadow-lg z-50 flex flex-col">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-semibold">Menu</h2>
+                    <Dialog.Close asChild>
+                      <Button variant="ghost" size="icon">
+                        <X className="h-5 w-5" />
+                      </Button>
+                    </Dialog.Close>
+                  </div>
+                  <div className="flex flex-col space-y-4">
+                    <NavLinks />
+                  </div>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
           </div>
         </div>
       </div>
