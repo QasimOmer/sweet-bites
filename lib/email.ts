@@ -8,24 +8,21 @@ export function initEmailJS() {
 
 export async function sendOrderConfirmationEmail(orderData: any) {
   try {
-    // Format order items for the template
-    const formattedItems = orderData.items.map((item: any) => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: (item.price * item.quantity).toLocaleString(),
-      image_url: item.image || "/placeholder.svg",
-    }))
+    // Create a simple string of order items for the email
+    const orderItemsText = orderData.items
+      .map((item: any) => `${item.name} x ${item.quantity} = ${(item.price * item.quantity).toLocaleString()} PKR`)
+      .join("\n")
 
-    // Prepare template parameters
+    // Prepare template parameters that match EmailJS template variables
     const templateParams = {
+      to_email: orderData.customerInfo.email,
       customer_name: orderData.customerInfo.name,
-      customer_email: orderData.customerInfo.email,
       order_id: orderData.orderId || "N/A",
-      orders: formattedItems,
-      total: orderData.total.toLocaleString(),
+      order_items: orderItemsText,
+      total_amount: orderData.total.toLocaleString(),
       delivery_address: orderData.customerInfo.address,
-      phone: orderData.customerInfo.phone,
-      to_email: orderData.customerInfo.email, // EmailJS needs this
+      customer_phone: orderData.customerInfo.phone,
+      customer_email: orderData.customerInfo.email,
     }
 
     console.log("Sending order confirmation email with params:", templateParams)
@@ -43,17 +40,16 @@ export async function sendOrderConfirmationEmail(orderData: any) {
 
 export async function sendWelcomeEmail(userEmail: string, userName: string) {
   try {
-    // Prepare template parameters
+    // Prepare template parameters for welcome email
     const templateParams = {
+      to_email: userEmail,
       customer_name: userName,
       customer_email: userEmail,
-      to_email: userEmail, // EmailJS needs this
     }
 
     console.log("Sending welcome email with params:", templateParams)
 
-    // Send email using your EmailJS credentials
-    // You'll need to create a welcome template in EmailJS and get its ID
+    // For now, use the same template - you can create a separate welcome template later
     const response = await emailjs.send("service_n7l0238", "template_99x8f38", templateParams)
 
     console.log("Welcome email sent successfully:", response)

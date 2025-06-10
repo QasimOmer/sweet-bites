@@ -18,7 +18,7 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 // Initialize Firestore (works on both server and client)
 export const db = getFirestore(app)
 
-// Sample products data
+// Sample products data with updated signature cake image
 const sampleProducts: Omit<Product, "id">[] = [
   {
     name: "Sweet Bites Signature Cake",
@@ -28,7 +28,7 @@ const sampleProducts: Omit<Product, "id">[] = [
     weight: "1 kg",
     ingredients:
       "Flour, sugar, butter, eggs, milk, vanilla, whipped cream cheese frosting, white chocolate chips, fresh strawberries",
-    image: "/images/cream-layer-cake.jpg",
+    image: "/images/hero-cake.jpg", // Changed to hero-cake.jpg
     category: "cakes",
     featured: true,
     inStock: true,

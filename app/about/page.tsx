@@ -5,22 +5,22 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8">About The Cream Layer</h1>
+        <h1 className="text-4xl font-bold text-center mb-8">About Sweet Bites</h1>
 
         <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
           <div>
             <Image
-              src="/placeholder.svg?height=400&width=400"
-              alt="The Cream Layer bakery"
-              width={400}
+              src="/images/hero-cake.jpg"
+              alt="Sweet Bites bakery - delicious homemade cakes"
+              width={500}
               height={400}
-              className="rounded-lg shadow-lg"
+              className="rounded-lg shadow-lg object-cover"
             />
           </div>
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Our Story</h2>
             <p className="text-gray-600">
-              The Cream Layer was born from a passion for creating exceptional baked goods that bring joy to every
+              Sweet Bites was born from a passion for creating exceptional baked goods that bring joy to every
               celebration. Located in the heart of Sahiwal, we've been serving our community with love-filled treats
               since our inception.
             </p>
@@ -35,18 +35,45 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <Card>
             <CardContent className="p-6 text-center">
+              <div className="mb-4">
+                <Image
+                  src="/images/cupcakes.jpg"
+                  alt="Fresh ingredients"
+                  width={80}
+                  height={80}
+                  className="mx-auto rounded-full object-cover"
+                />
+              </div>
               <h3 className="font-semibold text-lg mb-2">Fresh Ingredients</h3>
               <p className="text-gray-600">We source only the finest, freshest ingredients for all our products.</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
+              <div className="mb-4">
+                <Image
+                  src="/images/brownies.jpg"
+                  alt="Handcrafted treats"
+                  width={80}
+                  height={80}
+                  className="mx-auto rounded-full object-cover"
+                />
+              </div>
               <h3 className="font-semibold text-lg mb-2">Handcrafted</h3>
               <p className="text-gray-600">Every item is carefully made by hand with attention to detail.</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
+              <div className="mb-4">
+                <Image
+                  src="/images/donuts.jpg"
+                  alt="Local delivery"
+                  width={80}
+                  height={80}
+                  className="mx-auto rounded-full object-cover"
+                />
+              </div>
               <h3 className="font-semibold text-lg mb-2">Local Delivery</h3>
               <p className="text-gray-600">Fresh delivery right to your doorstep in Sahiwal and surrounding areas.</p>
             </CardContent>
