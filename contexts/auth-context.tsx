@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import { sendWelcomeEmail } from "@/lib/email"
 
 // Simple user interface without Firebase types
 interface SimpleUser {
@@ -86,6 +87,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth")
     const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password)
     await updateProfile(firebaseUser, { displayName: name })
+
+    // Send welcome email
+    if (firebaseUser.email) {
+      await sendWelcomeEmail(firebaseUser.email, name)
+    }
   }
 
   const signOut = async () => {

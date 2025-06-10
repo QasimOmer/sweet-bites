@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { createOrder } from "@/lib/firebase"
+import { sendOrderConfirmationEmail } from "@/lib/email"
 import { useRouter } from "next/navigation"
 
 export default function CheckoutPage() {
@@ -44,6 +45,19 @@ export default function CheckoutPage() {
       }
 
       const orderId = await createOrder(orderData)
+
+      // Send confirmation email with order ID
+      const emailResult = await sendOrderConfirmationEmail({
+        ...orderData,
+        orderId: orderId.slice(-8), // Show last 8 characters of order ID
+      })
+
+      if (emailResult.success) {
+        console.log("Order confirmation email sent successfully")
+      } else {
+        console.error("Failed to send order confirmation email:", emailResult.error)
+      }
+
       clearCart()
 
       toast({
