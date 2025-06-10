@@ -1,13 +1,32 @@
+"use client"
+
 // Email service using EmailJS
-import emailjs from "@emailjs/browser"
+let emailjs: any = null
 
 // Initialize EmailJS with your public key
 export function initEmailJS() {
-  emailjs.init("kVB5XVghVv9z4MdLy")
+  if (typeof window !== "undefined" && !emailjs) {
+    import("@emailjs/browser").then((module) => {
+      emailjs = module.default
+      emailjs.init("kVB5XVghVv9z4MdLy")
+    })
+  }
 }
 
 export async function sendOrderConfirmationEmail(orderData: any) {
   try {
+    // Initialize EmailJS if not already done
+    if (!emailjs && typeof window !== "undefined") {
+      const module = await import("@emailjs/browser")
+      emailjs = module.default
+      emailjs.init("kVB5XVghVv9z4MdLy")
+    }
+
+    if (!emailjs) {
+      console.log("EmailJS not available on server side")
+      return { success: false, error: "EmailJS not available" }
+    }
+
     // Create a simple string of order items for the email
     const orderItemsText = orderData.items
       .map((item: any) => `${item.name} x ${item.quantity} = ${(item.price * item.quantity).toLocaleString()} PKR`)
@@ -40,6 +59,18 @@ export async function sendOrderConfirmationEmail(orderData: any) {
 
 export async function sendWelcomeEmail(userEmail: string, userName: string) {
   try {
+    // Initialize EmailJS if not already done
+    if (!emailjs && typeof window !== "undefined") {
+      const module = await import("@emailjs/browser")
+      emailjs = module.default
+      emailjs.init("kVB5XVghVv9z4MdLy")
+    }
+
+    if (!emailjs) {
+      console.log("EmailJS not available on server side")
+      return { success: false, error: "EmailJS not available" }
+    }
+
     // Prepare template parameters for welcome email
     const templateParams = {
       to_email: userEmail,
