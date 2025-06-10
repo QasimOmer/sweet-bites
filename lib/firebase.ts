@@ -1,22 +1,32 @@
+"use client"
+
 import { initializeApp, getApps } from "firebase/app"
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc } from "firebase/firestore"
 import type { Product } from "@/types"
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
-  authDomain: "the-cream-layer.firebaseapp.com",
-  projectId: "the-cream-layer",
-  storageBucket: "the-cream-layer.firebasestorage.app",
-  messagingSenderId: "281475093052",
-  appId: "1:281475093052:web:e6ad430091e015621d6939",
-  measurementId: "G-51M6X4DJ2R",
+// Only initialize on client side
+let db: any = null
+
+const getFirebaseDb = async () => {
+  if (typeof window === "undefined") {
+    throw new Error("Firebase can only be used on client side")
+  }
+
+  if (db) return db
+
+  const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "the-cream-layer.firebaseapp.com",
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "the-cream-layer",
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "the-cream-layer.firebasestorage.app",
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "281475093052",
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:281475093052:web:e6ad430091e015621d6939",
+  }
+
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  db = getFirestore(app)
+  return db
 }
-
-// Initialize Firebase app (server-safe)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-
-// Initialize Firestore (works on both server and client)
-export const db = getFirestore(app)
 
 // Sample products data with updated signature cake image
 const sampleProducts: Omit<Product, "id">[] = [
@@ -28,7 +38,7 @@ const sampleProducts: Omit<Product, "id">[] = [
     weight: "1 kg",
     ingredients:
       "Flour, sugar, butter, eggs, milk, vanilla, whipped cream cheese frosting, white chocolate chips, fresh strawberries",
-    image: "/images/hero-cake.jpg", // Changed to hero-cake.jpg
+    image: "/images/hero-cake.jpg",
     category: "cakes",
     featured: true,
     inStock: true,
@@ -90,7 +100,16 @@ const sampleProducts: Omit<Product, "id">[] = [
 
 export async function getProducts(): Promise<Product[]> {
   try {
-    const querySnapshot = await getDocs(collection(db, "products"))
+    if (typeof window === "undefined") {
+      // Return sample products on server side
+      return sampleProducts.map((product, index) => ({
+        ...product,
+        id: `sample-${index}`,
+      }))
+    }
+
+    const database = await getFirebaseDb()
+    const querySnapshot = await getDocs(collection(database, "products"))
     const products: Product[] = []
 
     querySnapshot.forEach((doc) => {
@@ -118,7 +137,8 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function createOrder(orderData: any): Promise<string> {
   try {
-    const docRef = await addDoc(collection(db, "orders"), orderData)
+    const database = await getFirebaseDb()
+    const docRef = await addDoc(collection(database, "orders"), orderData)
     console.log("Order created:", docRef.id, orderData)
     return docRef.id
   } catch (error) {
@@ -129,7 +149,8 @@ export async function createOrder(orderData: any): Promise<string> {
 
 export async function getOrder(orderId: string) {
   try {
-    const docRef = doc(db, "orders", orderId)
+    const database = await getFirebaseDb()
+    const docRef = doc(database, "orders", orderId)
     const docSnap = await getDoc(docRef)
 
     if (docSnap.exists()) {
@@ -145,7 +166,8 @@ export async function getOrder(orderId: string) {
 
 export async function getAllOrders() {
   try {
-    const querySnapshot = await getDocs(collection(db, "orders"))
+    const database = await getFirebaseDb()
+    const querySnapshot = await getDocs(collection(database, "orders"))
     const orders: any[] = []
 
     querySnapshot.forEach((doc) => {
@@ -168,7 +190,8 @@ export async function getAllOrders() {
 
 export async function updateOrderStatus(orderId: string, status: string) {
   try {
-    const orderRef = doc(db, "orders", orderId)
+    const database = await getFirebaseDb()
+    const orderRef = doc(database, "orders", orderId)
     await updateDoc(orderRef, {
       status,
       updatedAt: new Date(),

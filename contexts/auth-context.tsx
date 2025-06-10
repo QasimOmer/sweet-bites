@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { sendWelcomeEmail } from "@/lib/email"
 
 // Simple user interface without Firebase types
 interface SimpleUser {
@@ -26,25 +25,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<any>(null)
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === "undefined") {
+      setLoading(false)
+      return
+    }
+
     // Dynamically import Firebase Auth only on client side
     const initAuth = async () => {
-      if (typeof window === "undefined") {
-        setLoading(false)
-        return
-      }
-
       try {
         const { initializeApp, getApps } = await import("firebase/app")
         const { getAuth, onAuthStateChanged } = await import("firebase/auth")
 
         const firebaseConfig = {
-          apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
-          authDomain: "the-cream-layer.firebaseapp.com",
-          projectId: "the-cream-layer",
-          storageBucket: "the-cream-layer.firebasestorage.app",
-          messagingSenderId: "281475093052",
-          appId: "1:281475093052:web:e6ad430091e015621d6939",
-          measurementId: "G-51M6X4DJ2R",
+          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "the-cream-layer.firebaseapp.com",
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "the-cream-layer",
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "the-cream-layer.firebasestorage.app",
+          messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "281475093052",
+          appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:281475093052:web:e6ad430091e015621d6939",
         }
 
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
@@ -88,9 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password)
     await updateProfile(firebaseUser, { displayName: name })
 
-    // Send welcome email
-    if (firebaseUser.email) {
-      await sendWelcomeEmail(firebaseUser.email, name)
+    // Send welcome email (client-side only)
+    if (typeof window !== "undefined" && firebaseUser.email) {
+      try {
+        const { sendWelcomeEmail } = await import("@/lib/email")
+        await sendWelcomeEmail(firebaseUser.email, name)
+      } catch (error) {
+        console.error("Failed to send welcome email:", error)
+      }
     }
   }
 
