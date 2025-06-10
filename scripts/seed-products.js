@@ -5,14 +5,14 @@ import { initializeApp } from "firebase/app"
 import { getFirestore, collection, addDoc } from "firebase/firestore"
 
 const firebaseConfig = {
-  // Add your Firebase config here
-  apiKey: "your-api-key",
-  authDomain: "your-auth-domain",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id",
-}
+  apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+  authDomain: "the-cream-layer.firebaseapp.com",
+  projectId: "the-cream-layer",
+  storageBucket: "the-cream-layer.firebasestorage.app",
+  messagingSenderId: "281475093052",
+  appId: "1:281475093052:web:e6ad430091e015621d6939",
+  measurementId: "G-51M6X4DJ2R"
+};
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
