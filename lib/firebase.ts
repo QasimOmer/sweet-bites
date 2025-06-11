@@ -1,32 +1,4 @@
-"use client"
-
-import { initializeApp, getApps } from "firebase/app"
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc } from "firebase/firestore"
 import type { Product } from "@/types"
-
-// Only initialize on client side
-let db: any = null
-
-const getFirebaseDb = async () => {
-  if (typeof window === "undefined") {
-    throw new Error("Firebase can only be used on client side")
-  }
-
-  if (db) return db
-
-  const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "the-cream-layer.firebaseapp.com",
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "the-cream-layer",
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "the-cream-layer.firebasestorage.app",
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "281475093052",
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:281475093052:web:e6ad430091e015621d6939",
-  }
-
-  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-  db = getFirestore(app)
-  return db
-}
 
 // Sample products data with updated signature cake image
 const sampleProducts: Omit<Product, "id">[] = [
@@ -99,17 +71,33 @@ const sampleProducts: Omit<Product, "id">[] = [
 ]
 
 export async function getProducts(): Promise<Product[]> {
+  if (typeof window === "undefined") {
+    // Server-side: return sample products
+    return sampleProducts.map((product, index) => ({
+      ...product,
+      id: `sample-${index}`,
+    }))
+  }
+
   try {
-    if (typeof window === "undefined") {
-      // Return sample products on server side
-      return sampleProducts.map((product, index) => ({
-        ...product,
-        id: `sample-${index}`,
-      }))
+    // Client-side: try to get from Firebase
+    const { initializeApp, getApps } = await import("firebase/app")
+    const { getFirestore, collection, getDocs } = await import("firebase/firestore")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
     }
 
-    const database = await getFirebaseDb()
-    const querySnapshot = await getDocs(collection(database, "products"))
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const db = getFirestore(app)
+
+    const querySnapshot = await getDocs(collection(db, "products"))
     const products: Product[] = []
 
     querySnapshot.forEach((doc) => {
@@ -136,9 +124,28 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function createOrder(orderData: any): Promise<string> {
+  if (typeof window === "undefined") {
+    throw new Error("Orders can only be created on the client side")
+  }
+
   try {
-    const database = await getFirebaseDb()
-    const docRef = await addDoc(collection(database, "orders"), orderData)
+    const { initializeApp, getApps } = await import("firebase/app")
+    const { getFirestore, collection, addDoc } = await import("firebase/firestore")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
+    }
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const db = getFirestore(app)
+
+    const docRef = await addDoc(collection(db, "orders"), orderData)
     console.log("Order created:", docRef.id, orderData)
     return docRef.id
   } catch (error) {
@@ -148,9 +155,28 @@ export async function createOrder(orderData: any): Promise<string> {
 }
 
 export async function getOrder(orderId: string) {
+  if (typeof window === "undefined") {
+    throw new Error("Orders can only be fetched on the client side")
+  }
+
   try {
-    const database = await getFirebaseDb()
-    const docRef = doc(database, "orders", orderId)
+    const { initializeApp, getApps } = await import("firebase/app")
+    const { getFirestore, doc, getDoc } = await import("firebase/firestore")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
+    }
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const db = getFirestore(app)
+
+    const docRef = doc(db, "orders", orderId)
     const docSnap = await getDoc(docRef)
 
     if (docSnap.exists()) {
@@ -165,9 +191,28 @@ export async function getOrder(orderId: string) {
 }
 
 export async function getAllOrders() {
+  if (typeof window === "undefined") {
+    throw new Error("Orders can only be fetched on the client side")
+  }
+
   try {
-    const database = await getFirebaseDb()
-    const querySnapshot = await getDocs(collection(database, "orders"))
+    const { initializeApp, getApps } = await import("firebase/app")
+    const { getFirestore, collection, getDocs } = await import("firebase/firestore")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
+    }
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const db = getFirestore(app)
+
+    const querySnapshot = await getDocs(collection(db, "orders"))
     const orders: any[] = []
 
     querySnapshot.forEach((doc) => {
@@ -189,9 +234,28 @@ export async function getAllOrders() {
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
+  if (typeof window === "undefined") {
+    throw new Error("Orders can only be updated on the client side")
+  }
+
   try {
-    const database = await getFirebaseDb()
-    const orderRef = doc(database, "orders", orderId)
+    const { initializeApp, getApps } = await import("firebase/app")
+    const { getFirestore, doc, updateDoc } = await import("firebase/firestore")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
+    }
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const db = getFirestore(app)
+
+    const orderRef = doc(db, "orders", orderId)
     await updateDoc(orderRef, {
       status,
       updatedAt: new Date(),
