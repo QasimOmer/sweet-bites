@@ -2,13 +2,12 @@
   "name": "cream-layer-bakery",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "node scripts/seed-products.js"
+    "seed": "node scripts/seed-products.cjs"
   },
   "dependencies": {
     "@emailjs/browser": "^3.11.0",
@@ -23,7 +22,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
-    "firebase": "^10.14.1",
+    "firebase": "^10.7.1",
     "lucide-react": "^0.294.0",
     "next": "14.0.4",
     "react": "^18",

@@ -22,35 +22,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SimpleUser | null>(null)
   const [loading, setLoading] = useState(true)
-  const [auth, setAuth] = useState<any>(null)
 
   useEffect(() => {
-    // Only run on client side
+    // Initialize auth only on client side
     if (typeof window === "undefined") {
       setLoading(false)
       return
     }
 
-    // Dynamically import Firebase Auth only on client side
+    let unsubscribe: (() => void) | undefined
+
     const initAuth = async () => {
       try {
         const { initializeApp, getApps } = await import("firebase/app")
         const { getAuth, onAuthStateChanged } = await import("firebase/auth")
 
         const firebaseConfig = {
-          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
-          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "the-cream-layer.firebaseapp.com",
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "the-cream-layer",
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "the-cream-layer.firebasestorage.app",
-          messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "281475093052",
-          appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:281475093052:web:e6ad430091e015621d6939",
+          apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+          authDomain: "the-cream-layer.firebaseapp.com",
+          projectId: "the-cream-layer",
+          storageBucket: "the-cream-layer.firebasestorage.app",
+          messagingSenderId: "281475093052",
+          appId: "1:281475093052:web:e6ad430091e015621d6939",
+          measurementId: "G-51M6X4DJ2R",
         }
 
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-        const authInstance = getAuth(app)
-        setAuth(authInstance)
+        const auth = getAuth(app)
 
-        const unsubscribe = onAuthStateChanged(authInstance, (firebaseUser) => {
+        unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
           if (firebaseUser) {
             setUser({
               uid: firebaseUser.uid,
@@ -62,8 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           setLoading(false)
         })
-
-        return unsubscribe
       } catch (error) {
         console.error("Error initializing auth:", error)
         setLoading(false)
@@ -71,24 +69,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     initAuth()
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe()
+      }
+    }
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    if (!auth) throw new Error("Auth not initialized")
+    if (typeof window === "undefined") throw new Error("Auth not available on server")
 
-    const { signInWithEmailAndPassword } = await import("firebase/auth")
+    const { getAuth, signInWithEmailAndPassword } = await import("firebase/auth")
+    const { initializeApp, getApps } = await import("firebase/app")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
+    }
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const auth = getAuth(app)
     await signInWithEmailAndPassword(auth, email, password)
   }
 
   const signUp = async (email: string, password: string, name: string) => {
-    if (!auth) throw new Error("Auth not initialized")
+    if (typeof window === "undefined") throw new Error("Auth not available on server")
 
-    const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth")
+    const { getAuth, createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth")
+    const { initializeApp, getApps } = await import("firebase/app")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
+    }
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const auth = getAuth(app)
     const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password)
     await updateProfile(firebaseUser, { displayName: name })
 
-    // Send welcome email (client-side only)
-    if (typeof window !== "undefined" && firebaseUser.email) {
+    // Send welcome email
+    if (firebaseUser.email) {
       try {
         const { sendWelcomeEmail } = await import("@/lib/email")
         await sendWelcomeEmail(firebaseUser.email, name)
@@ -99,9 +131,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
-    if (!auth) throw new Error("Auth not initialized")
+    if (typeof window === "undefined") throw new Error("Auth not available on server")
 
-    const { signOut: firebaseSignOut } = await import("firebase/auth")
+    const { getAuth, signOut: firebaseSignOut } = await import("firebase/auth")
+    const { initializeApp, getApps } = await import("firebase/app")
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFFtYFlMI9PFqZW5HWbsiv2NAQvxYxKng",
+      authDomain: "the-cream-layer.firebaseapp.com",
+      projectId: "the-cream-layer",
+      storageBucket: "the-cream-layer.firebasestorage.app",
+      messagingSenderId: "281475093052",
+      appId: "1:281475093052:web:e6ad430091e015621d6939",
+      measurementId: "G-51M6X4DJ2R",
+    }
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+    const auth = getAuth(app)
     await firebaseSignOut(auth)
   }
 
